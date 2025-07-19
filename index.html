@@ -41,9 +41,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="description" content="Sharisa's Med School Graduation Countdown">
   <meta name="theme-color" content="#4CAF50">
+  <meta name="mobile-web-app-capable" content="yes">
   <title>Sharisa's Med School Countdown</title>
   <style>
     body {
@@ -56,6 +58,9 @@
       flex-direction: column;
       align-items: center;
       min-height: 100vh;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
     h1 {
       color: #4CAF50;
@@ -90,6 +95,16 @@
       font-size: 1.5em;
       color: #4CAF50;
     }
+    .share-button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #25D366;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 1em;
+      cursor: pointer;
+    }
     @media (max-width: 600px) {
       h1 {
         font-size: 1.5em;
@@ -103,6 +118,10 @@
       }
       .countdown label {
         font-size: 0.9em;
+      }
+      .share-button {
+        font-size: 0.9em;
+        padding: 8px 16px;
       }
     }
   </style>
@@ -118,6 +137,7 @@
     <div><span id="seconds">0</span><label>Seconds</label></div>
   </div>
   <div class="congrats" id="congrats">Congratulations, Sharisa! She’s officially a doctor!</div>
+  <button class="share-button" onclick="shareOnWhatsApp()">Share on WhatsApp</button>
 
   <script>
     const targetDate = new Date('November 6, 2027 00:00:00').getTime();
@@ -145,8 +165,22 @@
       document.getElementById('seconds').textContent = seconds;
     }
 
+    function shareOnWhatsApp() {
+      const url = window.location.href;
+      const text = encodeURIComponent("Check out Sharisa's Med School Countdown to November 6, 2027! " + url);
+      const whatsappUrl = `https://wa.me/?text=${text}`;
+      window.open(whatsappUrl, '_blank');
+    }
+
     updateCountdown();
     setInterval(updateCountdown, 1000);
+
+    // Prevent default touch behaviors to improve mobile experience
+    document.addEventListener('touchstart', function(e) {
+      if (e.target.tagName !== 'BUTTON') {
+        e.preventDefault();
+      }
+    }, { passive: false });
   </script>
 </body>
 </html>
