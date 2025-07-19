@@ -1,0 +1,152 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Sharisa's Med School Graduation Countdown">
+  <meta name="theme-color" content="#4CAF50">
+  <title>Sharisa's Med School Countdown</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4CAF50;
+      font-size: 2em;
+      margin-bottom: 20px;
+    }
+    .countdown {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+    }
+    .countdown div {
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      min-width: 60px;
+    }
+    .countdown span {
+      display: block;
+      font-size: 2em;
+      color: #333;
+    }
+    .countdown label {
+      font-size: 1em;
+      color: #666;
+    }
+    .congrats {
+      display: none;
+      margin-top: 20px;
+      font-size: 1.5em;
+      color: #4CAF50;
+    }
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.5em;
+      }
+      .countdown div {
+        min-width: 50px;
+        padding: 10px;
+      }
+      .countdown span {
+        font-size: 1.5em;
+      }
+      .countdown label {
+        font-size: 0.9em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Sharisa's Med School Countdown</h1>
+  <p>Counting down to November 6, 2027 (Graduation!)</p>
+  <div class="countdown">
+    <div><span id="months">0</span><label>Months</label></div>
+    <div><span id="days">0</span><label>Days</label></div>
+    <div><span id="hours">0</span><label>Hours</label></div>
+    <div><span id="minutes">0</span><label>Minutes</label></div>
+    <div><span id="seconds">0</span><label>Seconds</label></div>
+  </div>
+  <div class="congrats" id="congrats">Congratulations, Sharisa! She’s officially a doctor!</div>
+
+  <script>
+    const targetDate = new Date('November 6, 2027 00:00:00').getTime();
+
+    function updateCountdown() {
+      const now = new Date().getTime();
+      const timeLeft = targetDate - now;
+
+      if (timeLeft <= 0) {
+        document.querySelector('.countdown').style.display = 'none';
+        document.getElementById('congrats').style.display = 'block';
+        return;
+      }
+
+      const months = Math.floor(timeLeft / (1000 * 60 * 60 * 24 * 30));
+      const days = Math.floor((timeLeft % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+      document.getElementById('months').textContent = months;
+      document.getElementById('days').textContent = days;
+      document.getElementById('hours').textContent = hours;
+      document.getElementById('minutes').textContent = minutes;
+      document.getElementById('seconds').textContent = seconds;
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+  </script>
+</body>
+</html>
